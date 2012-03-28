@@ -185,11 +185,11 @@ class MongoFormFieldGenerator(object):
     def get_field_label(self, field):
         if field.verbose_name:
             return field.verbose_name
-        return field.name.capitalize()
+        return field.name
 
     def get_field_help_text(self, field):
         if field.help_text:
-            return field.help_text.capitalize()
+            return field.help_text
 
     def generate_stringfield(self, field, **kwargs):
         form_class = MongoCharField
