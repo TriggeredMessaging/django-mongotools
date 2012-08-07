@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.encoding import smart_unicode
 from pymongo.errors import InvalidId
-from pymongo.objectid import ObjectId
+from bson import ObjectId
 from django.core.validators import EMPTY_VALUES
 from django.utils.encoding import smart_unicode, force_unicode
 from django.utils.translation import ugettext_lazy as _
@@ -54,6 +54,13 @@ class ReferenceField(forms.ChoiceField):
             return value.pk
         
         return super(ReferenceField, self).prepare_value(value)
+
+    def __deepcopy__(self, memo):
+        result = super(forms.ChoiceField, self).__deepcopy__(memo)
+        result.queryset = result.queryset
+        result.empty_label = result.empty_label
+        return result
+
 
     def _set_queryset(self, queryset):
         self._queryset = queryset
