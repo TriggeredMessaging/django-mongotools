@@ -8,6 +8,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from mongoengine import ReferenceField as MongoReferenceField
 
+from mongoengine.fields import (
+    IntField, SequenceField)
+
 BLANK_CHOICE_DASH = [("", "---------")]
 
 class MongoChoiceIterator(object):
@@ -35,14 +38,14 @@ class MongoCharField(forms.CharField):
             return None
         return smart_unicode(value)
 
-class ReferenceField(forms.ChoiceField):
+class ReferenceField(forms.TypedChoiceField):
     """
     Reference field for mongo forms. Inspired by `django.forms.models.ModelChoiceField`.
     """
     def __init__(self, queryset, empty_label=u"---------",
                  *aargs, **kwaargs):
         
-        forms.Field.__init__(self, *aargs, **kwaargs)
+        super(ReferenceField, self).__init__(*aargs, **kwaargs)
         self.queryset = queryset
         self.empty_label = empty_label
         
@@ -81,18 +84,20 @@ class ReferenceField(forms.ChoiceField):
         """
         return smart_unicode(obj)
 
-    def clean(self, value):
-        if value in EMPTY_VALUES and not self.required:
+    def clean(self, oid):
+        if oid in EMPTY_VALUES and not self.required:
             return None
 
         try:
-            oid = ObjectId(value)
+            if self.coerce != int:
+                oid = ObjectId(oid)
+
             oid = super(ReferenceField, self).clean(oid)
 
             queryset = self.queryset.clone()
-            obj = queryset.get(id=oid)
+            obj = queryset.get(pk=oid)
         except (TypeError, InvalidId, self.queryset._document.DoesNotExist):
-            raise forms.ValidationError(self.error_messages['invalid_choice'] % {'value':value})
+            raise forms.ValidationError(self.error_messages['invalid_choice'] % {'value': oid})
         return obj
 
 class DocumentMultipleChoiceField(ReferenceField):
@@ -347,6 +352,13 @@ class MongoFormFieldGenerator(object):
         }
         
         defaults.update(kwargs)
+
+        id_field_name = field.document_type._meta['id_field']
+        id_field = field.document_type._fields[id_field_name]
+
+        if isinstance(id_field, (SequenceField, IntField)):
+            defaults['coerce'] = int
+
         return ReferenceField(field.document_type.objects, **defaults)
 
     def generate_listfield(self, field, **kwargs):
@@ -373,4 +385,10 @@ class MongoFormFieldGenerator(object):
             return f
         
     def generate_filefield(self, field, **kwargs):
-        return forms.FileField(**kwargs)
+        defaults = {
+            'required': field.required,
+            'label': self.get_field_label(field),
+            'help_text': self.get_field_help_text(field),
+        }
+        defaults.update(kwargs)
+        return forms.FileField(**defaults)
