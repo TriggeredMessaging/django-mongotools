@@ -53,16 +53,16 @@ def iter_valid_fields(meta):
             continue
 
         if isinstance(field, EmbeddedDocumentField): #skip EmbeddedDocumentField
-            logger.error("Ignoring field %s because it is an EmbeddedDocumentField" % (field_name) )
+            logger.debug("Ignoring field %s because it is an EmbeddedDocumentField" % (field_name) )
             continue
 
         if isinstance(field, ListField):
             if hasattr(field.field, 'choices') and not isinstance(field.field, ReferenceField):
                 if not field.field.choices:
-                    logger.error("Ignoring field %s because it is a ListField but doesn't have any choices" % (field_name) )
+                    logger.debug("Ignoring field %s because it is a ListField but doesn't have any choices" % (field_name) )
                     continue
             elif not isinstance(field.field, ReferenceField):
-                logger.error("Ignoring field %s" % (field_name) )
+                logger.debug("Ignoring field %s" % (field_name) )
                 continue
 
         yield (field_name, field)
