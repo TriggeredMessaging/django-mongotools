@@ -3,7 +3,7 @@ from django.utils.encoding import smart_unicode
 from pymongo.errors import InvalidId
 from bson import ObjectId
 from django.core.validators import EMPTY_VALUES
-from django.utils.encoding import smart_unicode, force_unicode
+from django.utils.encoding import smart_unicode, force_text
 from django.utils.translation import ugettext_lazy as _
 
 from mongoengine import ReferenceField as MongoReferenceField
@@ -132,9 +132,9 @@ class DocumentMultipleChoiceField(ReferenceField):
                 raise forms.ValidationError(self.error_messages['invalid_pk_value'] % pk)
         qs = self.queryset.clone()
         qs = qs.filter(**{'%s__in' % key: filter_ids})
-        pks = set([force_unicode(getattr(o, key)) for o in qs])
+        pks = set([force_text(getattr(o, key)) for o in qs])
         for val in value:
-            if force_unicode(val) not in pks:
+            if force_text(val) not in pks:
                 raise forms.ValidationError(self.error_messages['invalid_choice'] % val)
         # Since this overrides the inherited ModelChoiceField.clean
         # we run custom validators here

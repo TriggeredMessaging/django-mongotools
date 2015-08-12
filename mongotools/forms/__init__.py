@@ -86,7 +86,7 @@ class MongoForm(forms.BaseForm):
     __metaclass__ = MongoFormMetaClass
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None,
-                 error_class=forms.util.ErrorList, label_suffix=':',
+                 error_class=forms.utils.ErrorList, label_suffix=':',
                  empty_permitted=False, instance=None):
         """ initialize the form"""
 
