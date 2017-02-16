@@ -7,7 +7,7 @@ from django.forms.widgets import media_property
 from mongoengine.base import BaseDocument
 from mongotools.forms.fields import MongoFormFieldGenerator
 from mongotools.forms.utils import mongoengine_validate_wrapper, iter_valid_fields, save_file
-from mongoengine.fields import ReferenceField, FileField, ListField
+from django_mongoengine.fields import ReferenceField, FileField, ListField
 
 __all__ = ('MongoForm',)
 

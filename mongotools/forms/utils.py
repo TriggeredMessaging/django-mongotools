@@ -3,8 +3,9 @@ import itertools
 import gridfs
 
 from django import forms
-from mongoengine.base import ValidationError
-from mongoengine.fields import EmbeddedDocumentField, ListField, ReferenceField
+
+from django_mongoengine import fields
+from mongoengine import ValidationError
 from mongoengine.connection import _get_db
 
 from fields import MongoFormFieldGenerator
@@ -52,16 +53,16 @@ def iter_valid_fields(meta):
         if (meta_fields and field_name not in meta_fields) or field_name in meta_exclude:
             continue
 
-        if isinstance(field, EmbeddedDocumentField): #skip EmbeddedDocumentField
+        if isinstance(field, fields.EmbeddedDocumentField): #skip EmbeddedDocumentField
             logger.debug("Ignoring field %s because it is an EmbeddedDocumentField" % (field_name) )
             continue
 
-        if isinstance(field, ListField):
-            if hasattr(field.field, 'choices') and not isinstance(field.field, ReferenceField):
+        if isinstance(field, fields.ListField):
+            if hasattr(field.field, 'choices') and not isinstance(field.field, fields.ReferenceField):
                 if not field.field.choices:
                     #logger.debug("Ignoring field %s because it is a ListField but doesn't have any choices" % (field_name) )
                     continue
-            elif not isinstance(field.field, ReferenceField):
+            elif not isinstance(field.field, fields.ReferenceField):
                 logger.debug("Ignoring field %s" % (field_name) )
                 continue
 

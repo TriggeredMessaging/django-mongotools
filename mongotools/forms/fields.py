@@ -6,9 +6,9 @@ from django.core.validators import EMPTY_VALUES
 from django.utils.encoding import smart_unicode, force_text
 from django.utils.translation import ugettext_lazy as _
 
-from mongoengine import ReferenceField as MongoReferenceField
+from django_mongoengine.fields import ReferenceField as MongoReferenceField
 
-from mongoengine.fields import (
+from django_mongoengine.fields import (
     IntField, SequenceField)
 
 BLANK_CHOICE_DASH = [("", "---------")]
@@ -195,12 +195,12 @@ class MongoFormFieldGenerator(object):
         return value.lower() == 'true'
 
     def get_field_label(self, field):
-        if field.verbose_name:
+        if hasattr(field, "verbose_name") and field.verbose_name:
             return field.verbose_name
         return field.name
 
     def get_field_help_text(self, field):
-        if field.help_text:
+        if hasattr(field, "help_text") and field.help_text:
             return field.help_text
 
     def generate_stringfield(self, field, **kwargs):
