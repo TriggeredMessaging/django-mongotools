@@ -1,7 +1,7 @@
 import types
 from django import forms
 from django.core.files.uploadedfile import UploadedFile
-from django.utils.datastructures import SortedDict
+from collections import OrderedDict
 from django.forms.widgets import media_property
 
 from mongoengine.base import BaseDocument
@@ -29,12 +29,12 @@ class MongoFormMetaClass(type):
                 fields = base.base_fields.items() + fields
 
         # add the fields as "our" base fields
-        attrs['base_fields'] = SortedDict(fields)
+        attrs['base_fields'] = OrderedDict(fields)
 
         # Meta class available?
         if 'Meta' in attrs and hasattr(attrs['Meta'], 'document') and \
            issubclass(attrs['Meta'].document, BaseDocument):
-            doc_fields = SortedDict()
+            doc_fields = OrderedDict()
 
             formfield_generator = getattr(attrs['Meta'], 'formfield_generator',
                                           MongoFormFieldGenerator)()
