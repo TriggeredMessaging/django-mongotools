@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import types
 from django import forms
 from django.core.files.uploadedfile import UploadedFile
@@ -8,6 +9,7 @@ from mongoengine.base import BaseDocument
 from mongotools.forms.fields import MongoFormFieldGenerator
 from mongotools.forms.utils import mongoengine_validate_wrapper, iter_valid_fields, save_file
 from django_mongoengine.fields import ReferenceField, FileField, ListField
+import six
 
 __all__ = ('MongoForm',)
 
@@ -18,15 +20,28 @@ class MongoFormMetaClass(type):
 
     def __new__(cls, name, bases, attrs):
         # get all valid existing Fields and sort them
-        fields = [(field_name, attrs.pop(field_name)) for field_name, obj in
-                  attrs.items() if isinstance(obj, forms.Field)]
-        fields.sort(
-            lambda x, y: cmp(x[1].creation_counter, y[1].creation_counter))
+        # fields = [(field_name, attrs.pop(field_name)) for field_name, obj in
+        #           attrs.items() if isinstance(obj, forms.Field)]
+
+        fields = []
+        to_pop = []
+        for field_name, obj in attrs.items():
+            if isinstance(obj, forms.Field):
+                fields.append(((field_name, attrs.get(field_name))))
+                to_pop.append(field_name)
+
+        for field_name in to_pop:
+            attrs.pop(field_name)
+
+
+
+
+        fields.sort(key=lambda x: x[1].creation_counter)
 
         # get all Fields from base classes
         for base in bases[::-1]:
             if hasattr(base, 'base_fields'):
-                fields = base.base_fields.items() + fields
+                fields = list(base.base_fields.items()) + fields
 
         # add the fields as "our" base fields
         attrs['base_fields'] = OrderedDict(fields)
@@ -80,17 +95,16 @@ class MongoFormMetaClass(type):
         return new_class
 
 
-class MongoForm(forms.BaseForm):
+class MongoForm(six.with_metaclass(MongoFormMetaClass, forms.BaseForm)):
 
     """Base MongoForm class. Used to create new MongoForms"""
-    __metaclass__ = MongoFormMetaClass
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None,
                  error_class=forms.utils.ErrorList, label_suffix=':',
                  empty_permitted=False, instance=None):
         """ initialize the form"""
 
-        assert isinstance(instance, (types.NoneType, BaseDocument)), \
+        assert isinstance(instance, (type(None), BaseDocument)), \
             'instance must be a mongoengine document, not %s' % \
             type(instance).__name__
 

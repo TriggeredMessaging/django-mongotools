@@ -1,15 +1,14 @@
-from django import forms
-from django.utils.encoding import smart_unicode
-from pymongo.errors import InvalidId
+from __future__ import absolute_import
 from bson import ObjectId
+from django import forms
 from django.core.validators import EMPTY_VALUES
-from django.utils.encoding import smart_unicode, force_text
+
+from django.utils.encoding import smart_text, force_text
 from django.utils.translation import ugettext_lazy as _
-
-from django_mongoengine.fields import ReferenceField as MongoReferenceField
-
 from django_mongoengine.fields import (
     IntField, SequenceField)
+from django_mongoengine.fields import ReferenceField as MongoReferenceField
+from pymongo.errors import InvalidId
 
 BLANK_CHOICE_DASH = [("", "---------")]
 
@@ -21,7 +20,7 @@ class MongoChoiceIterator(object):
     def __iter__(self):
         if self.field.empty_label is not None:
             yield (u"", self.field.empty_label)
-        
+
         for obj in self.queryset.all():
             yield self.choice(obj)
 
@@ -36,7 +35,7 @@ class MongoCharField(forms.CharField):
     def to_python(self, value):
         if value in EMPTY_VALUES:
             return None
-        return smart_unicode(value)
+        return smart_text(value)
 
 class ReferenceField(forms.TypedChoiceField):
     """
@@ -44,18 +43,18 @@ class ReferenceField(forms.TypedChoiceField):
     """
     def __init__(self, queryset, empty_label=u"---------",
                  *aargs, **kwaargs):
-        
+
         super(ReferenceField, self).__init__(*aargs, **kwaargs)
         self.queryset = queryset
         self.empty_label = empty_label
-        
+
     def _get_queryset(self):
         return self._queryset
-        
+
     def prepare_value(self, value):
         if hasattr(value, '_meta'):
             return value.pk
-        
+
         return super(ReferenceField, self).prepare_value(value)
 
     def __deepcopy__(self, memo):
@@ -75,7 +74,7 @@ class ReferenceField(forms.TypedChoiceField):
         return MongoChoiceIterator(self)
 
     choices = property(_get_choices, forms.ChoiceField._set_choices)
-    
+
     def label_from_instance(self, obj):
         """
         This method is used to convert objects into strings; it's used to
@@ -102,7 +101,7 @@ class ReferenceField(forms.TypedChoiceField):
 
 class DocumentMultipleChoiceField(ReferenceField):
     """A MultipleChoiceField whose choices are a model QuerySet."""
-    widget = forms.SelectMultiple   
+    widget = forms.SelectMultiple
     hidden_widget = forms.MultipleHiddenInput
     default_error_messages = {
         'list': _(u'Enter a list of values.'),
@@ -112,7 +111,7 @@ class DocumentMultipleChoiceField(ReferenceField):
     }
 
     def __init__(self, queryset, *args, **kwargs):
-        super(DocumentMultipleChoiceField, self).__init__(queryset, empty_label=None, *args, **kwargs)  
+        super(DocumentMultipleChoiceField, self).__init__(queryset, empty_label=None, *args, **kwargs)
 
     def clean(self, value):
         if self.required and not value:
@@ -122,7 +121,7 @@ class DocumentMultipleChoiceField(ReferenceField):
         if not isinstance(value, (list, tuple)):
             raise forms.ValidationError(self.error_messages['list'])
         key = 'pk'
-        
+
         filter_ids = []
         for pk in value:
             try:
@@ -149,7 +148,7 @@ class DocumentMultipleChoiceField(ReferenceField):
 
 class MongoFormFieldGenerator(object):
     """This is singleton class generates Django form-fields for mongoengine-fields."""
-    
+
     _instance = None
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -158,7 +157,7 @@ class MongoFormFieldGenerator(object):
         return cls._instance
 
     def generate(self, field, **kwargs):
-        """Tries to lookup a matching formfield generator (lowercase 
+        """Tries to lookup a matching formfield generator (lowercase
         field-classname) and raises a NotImplementedError of no generator
         can be found.
         """
@@ -173,7 +172,7 @@ class MongoFormFieldGenerator(object):
 
             raise NotImplementedError('%s is not supported by MongoForm' % \
                                           field.__class__.__name__)
-                
+
     def get_field_choices(self, field, include_blank=True,
                           blank_choice=BLANK_CHOICE_DASH):
         first_choice = include_blank and blank_choice or []
@@ -213,7 +212,7 @@ class MongoFormFieldGenerator(object):
 
         if field.max_length and not field.choices:
             defaults['max_length'] = field.max_length
-            
+
         if field.max_length is None and not field.choices:
             defaults['widget'] = forms.Textarea
 
@@ -226,7 +225,7 @@ class MongoFormFieldGenerator(object):
 
             if not field.required:
                 defaults['empty_value'] = None
-                
+
         defaults.update(kwargs)
         return form_class(**defaults)
 
@@ -237,9 +236,9 @@ class MongoFormFieldGenerator(object):
             'max_length': field.max_length,
             'initial': field.default,
             'label': self.get_field_label(field),
-            'help_text': self.get_field_help_text(field)    
+            'help_text': self.get_field_help_text(field)
         }
-        
+
         defaults.update(kwargs)
         return forms.EmailField(**defaults)
 
@@ -252,7 +251,7 @@ class MongoFormFieldGenerator(object):
             'label': self.get_field_label(field),
             'help_text':  self.get_field_help_text(field)
         }
-        
+
         defaults.update(kwargs)
         return forms.URLField(**defaults)
 
@@ -265,9 +264,9 @@ class MongoFormFieldGenerator(object):
                 'initial': field.default,
                 'label': self.get_field_label(field),
                 'choices': self.get_field_choices(field),
-                'help_text': self.get_field_help_text(field)        
+                'help_text': self.get_field_help_text(field)
             }
-            
+
             defaults.update(kwargs)
             return forms.TypedChoiceField(**defaults)
         else:
@@ -277,9 +276,9 @@ class MongoFormFieldGenerator(object):
                 'max_value': field.max_value,
                 'initial': field.default,
                 'label': self.get_field_label(field),
-                'help_text': self.get_field_help_text(field)      
+                'help_text': self.get_field_help_text(field)
             }
-            
+
             defaults.update(kwargs)
             return forms.IntegerField(**defaults)
 
@@ -318,9 +317,9 @@ class MongoFormFieldGenerator(object):
                 'initial': field.default,
                 'label': self.get_field_label(field),
                 'choices': self.get_field_choices(field),
-                'help_text': self.get_field_help_text(field)        
+                'help_text': self.get_field_help_text(field)
             }
-            
+
             defaults.update(kwargs)
             return forms.TypedChoiceField(**defaults)
         else:
@@ -328,9 +327,9 @@ class MongoFormFieldGenerator(object):
                 'required': field.required,
                 'initial': field.default,
                 'label': self.get_field_label(field),
-                'help_text': self.get_field_help_text(field)     
+                'help_text': self.get_field_help_text(field)
                 }
-            
+
             defaults.update(kwargs)
             return forms.BooleanField(**defaults)
 
@@ -340,7 +339,7 @@ class MongoFormFieldGenerator(object):
             'initial': field.default,
             'label': self.get_field_label(field),
         }
-        
+
         defaults.update(kwargs)
         return forms.DateTimeField(**defaults)
 
@@ -350,7 +349,7 @@ class MongoFormFieldGenerator(object):
             'help_text': self.get_field_help_text(field),
             'required': field.required
         }
-        
+
         defaults.update(kwargs)
 
         id_field_name = field.document_type._meta['id_field']
@@ -368,9 +367,9 @@ class MongoFormFieldGenerator(object):
                 'required': field.required,
                 'label': self.get_field_label(field),
                 'help_text': self.get_field_help_text(field),
-                'widget': forms.CheckboxSelectMultiple     
+                'widget': forms.CheckboxSelectMultiple
             }
-            
+
             defaults.update(kwargs)
             return forms.MultipleChoiceField(**defaults)
         elif isinstance(field.field, MongoReferenceField):
@@ -379,11 +378,11 @@ class MongoFormFieldGenerator(object):
                 'help_text': self.get_field_help_text(field),
                 'required': field.required
             }
-        
+
             defaults.update(kwargs)
             f = DocumentMultipleChoiceField(field.field.document_type.objects, **defaults)
             return f
-        
+
     def generate_filefield(self, field, **kwargs):
         defaults = {
             'required': field.required,

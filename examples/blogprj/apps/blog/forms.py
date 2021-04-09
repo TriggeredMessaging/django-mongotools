@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from django import forms
 from mongotools.forms import MongoForm
-from models import BlogPost, Tag
+from .models import BlogPost, Tag
 
 class TagForm(MongoForm):
     class Meta:

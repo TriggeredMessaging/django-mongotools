@@ -20,6 +20,7 @@
 # This file is based in Django Class Views
 # adapted for use of mongoengine
 
+from __future__ import absolute_import
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import FormMixin, ProcessFormView, DeletionMixin
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist

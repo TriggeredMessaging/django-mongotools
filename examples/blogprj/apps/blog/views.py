@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from mongotools.views import (CreateView, UpdateView,
                               DeleteView, ListView,
                               DetailView)
 
-from models import BlogPost, Tag
-from forms import BlogPostForm, TagForm
+from .models import BlogPost, Tag
+from .forms import BlogPostForm, TagForm
 
 class PostIndexView(ListView):
     document = BlogPost

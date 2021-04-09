@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from django.conf.urls.defaults import *
 from django.views.generic.simple import redirect_to, direct_to_template
-from views import (AddPostView, UpdatePostView, PostIndexView,
+from .views import (AddPostView, UpdatePostView, PostIndexView,
                    PostDetailView, DeletePostView, AddTagView, 
                    UpdateTagView, TagDetailView)
 
