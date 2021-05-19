@@ -6,8 +6,8 @@ from collections import OrderedDict
 from django.forms.widgets import media_property
 
 from mongoengine.base import BaseDocument
-from mongotools.forms.fields import MongoFormFieldGenerator
-from mongotools.forms.utils import mongoengine_validate_wrapper, iter_valid_fields, save_file
+from .fields import MongoFormFieldGenerator
+from .utils import mongoengine_validate_wrapper, iter_valid_fields, save_file
 from django_mongoengine.fields import ReferenceField, FileField, ListField
 import six
 

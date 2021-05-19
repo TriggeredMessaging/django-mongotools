@@ -21,14 +21,15 @@
 # adapted for use of mongoengine
 
 from __future__ import absolute_import
-from django.views.generic.detail import BaseDetailView
-from django.views.generic.edit import FormMixin, ProcessFormView, DeletionMixin
-from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
-from django.views.generic.base import TemplateResponseMixin, View
-from django.http import HttpResponseRedirect, Http404
-from django.views.generic.list import MultipleObjectMixin
-from django.shortcuts import render
+
 from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render
+from django.views.generic.base import TemplateResponseMixin, View
+from django.views.generic.edit import FormMixin, ProcessFormView
+from django.views.generic.list import MultipleObjectMixin
+
 
 class MongoSingleObjectMixin(object):
     """
@@ -82,11 +83,11 @@ class MongoSingleObjectMixin(object):
 
     def get_context_data(self, **kwargs):
         return kwargs
-        
+
 class MongoMultipleObjectMixin(MultipleObjectMixin):
 
     document = None
-    
+
     def get_queryset(self):
         """
         Get the list of items for this view. This must be an interable, and may
@@ -112,7 +113,7 @@ class MongoSingleObjectTemplateResponseMixin(TemplateResponseMixin):
         Return a list of template names to be used for the request. Must return
         a list. May not be called if get_template is overridden.
         """
-        
+
         try:
             names = super(MongoSingleObjectTemplateResponseMixin,
                           self).get_template_names()
@@ -205,7 +206,7 @@ class MongoFormMixin(FormMixin, MongoSingleObjectMixin):
         if self.object:
             context['object'] = self.object
         return context
-        
+
 class BaseDetailView(MongoSingleObjectMixin, View):
     historic_view_action = None
     def get(self, request, **kwargs):
@@ -310,7 +311,7 @@ class DeleteView(MongoSingleObjectTemplateResponseMixin, BaseDeleteView):
     with a response rendered by template.
     """
     template_name_suffix = 'confirm_delete'
-    
+
 class BaseListView(MongoMultipleObjectMixin, View):
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()

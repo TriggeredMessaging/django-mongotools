@@ -81,7 +81,7 @@ class ReferenceField(forms.TypedChoiceField):
         generate the labels for the choices presented by this object. Subclasses
         can override this method to customize the display of the choices.
         """
-        return smart_unicode(obj)
+        return smart_text(obj)
 
     def clean(self, oid):
         if oid in EMPTY_VALUES and not self.required:
@@ -181,7 +181,7 @@ class MongoFormFieldGenerator(object):
     def string_field(self, value):
         if value in EMPTY_VALUES:
             return None
-        return smart_unicode(value)
+        return smart_text(value)
 
     def integer_field(self, value):
         if value in EMPTY_VALUES:
