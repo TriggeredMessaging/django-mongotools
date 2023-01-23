@@ -36,7 +36,6 @@ class MongoFormMetaClass(type):
 
 
 
-        fields.sort(key=lambda x: x[1].creation_counter)
 
         # get all Fields from base classes
         for base in bases[::-1]:
