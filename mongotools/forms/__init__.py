@@ -33,9 +33,7 @@ class MongoFormMetaClass(type):
         for field_name in to_pop:
             attrs.pop(field_name)
 
-
-
-
+        # fields.sort(key=lambda x: x[1].creation_counter)
 
         # get all Fields from base classes
         for base in bases[::-1]:
@@ -80,7 +78,15 @@ class MongoFormMetaClass(type):
 
             # write the new document fields to base_fields
             doc_fields.update(attrs['base_fields'])
-            attrs['base_fields'] = doc_fields
+
+            sorted_fields = {}
+            if hasattr(attrs['Meta'], "field_order") and attrs['Meta'].field_order:
+                for key in (attrs['Meta'].field_order or []):
+                    sorted_fields[key] = doc_fields[key]
+            else:
+                sorted_fields = doc_fields
+
+            attrs['base_fields'] = sorted_fields
 
         # maybe we need the Meta class later
         attrs['_meta'] = attrs.get('Meta', object())

@@ -4,7 +4,7 @@ from django import forms
 from django.core.validators import EMPTY_VALUES
 
 from django.utils.encoding import smart_text, force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_mongoengine.fields import (
     IntField, SequenceField)
 from django_mongoengine.fields import ReferenceField as MongoReferenceField
