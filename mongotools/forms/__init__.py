@@ -80,9 +80,14 @@ class MongoFormMetaClass(type):
             doc_fields.update(attrs['base_fields'])
 
             sorted_fields = {}
+            # Use the sort order from Meta
             if hasattr(attrs['Meta'], "field_order") and attrs['Meta'].field_order:
                 for key in (attrs['Meta'].field_order or []):
                     sorted_fields[key] = doc_fields[key]
+                # If any keys are missing in field_order, tack them onto the end
+                for key in doc_fields:
+                    if not key in sorted_fields:
+                        sorted_fields[key] = doc_fields[key]
             else:
                 sorted_fields = doc_fields
 
