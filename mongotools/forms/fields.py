@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django_mongoengine.fields import (
     IntField, SequenceField)
 from django_mongoengine.fields import ReferenceField as MongoReferenceField
-from pymongo.errors import InvalidId
+from bson.errors import InvalidId
 
 BLANK_CHOICE_DASH = [("", "---------")]
 

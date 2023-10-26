@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-mongotools',
-    version='0.2.2',
+    version='0.2.3',
     description='ClassViews, Form mongoengine support for django',
     author='Wilson Pinto Júnior',
     author_email='wilsonpjunior@gmail.com',
