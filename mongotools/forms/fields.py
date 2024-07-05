@@ -2,8 +2,7 @@ from __future__ import absolute_import
 from bson import ObjectId
 from django import forms
 from django.core.validators import EMPTY_VALUES
-
-from django.utils.encoding import smart_text, force_text
+from django.utils.encoding import smart_str as smart_text, force_str as force_text
 from django.utils.translation import gettext_lazy as _
 from django_mongoengine.fields import (
     IntField, SequenceField)
