@@ -3,11 +3,11 @@ import itertools
 import gridfs
 
 from django import forms
-from mongoengine.base import ValidationError
+from mongoengine.errors import ValidationError
 from mongoengine.fields import EmbeddedDocumentField, ListField, ReferenceField
-from mongoengine.connection import _get_db
+from mongoengine.connection import get_db
 
-from fields import MongoFormFieldGenerator
+from mongotools.forms.fields import MongoFormFieldGenerator
 import logging
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def mongoengine_validate_wrapper(field, old_clean, new_clean):
         try:
             new_clean(value)
             return value
-        except ValidationError, e:
+        except ValidationError as e:
             raise forms.ValidationError(e)
     return inner_validate
 
@@ -68,12 +68,12 @@ def iter_valid_fields(meta):
         yield (field_name, field)
 
 def _get_unique_filename(name):
-    fs = gridfs.GridFS(_get_db())
+    fs = gridfs.GridFS(get_db())
     file_root, file_ext = os.path.splitext(name)
     count = itertools.count(1)
     while fs.exists(filename=name):
         # file_ext includes the dot.
-        name = os.path.join("%s_%s%s" % (file_root, count.next(), file_ext))
+        name = os.path.join("%s_%s%s" % (file_root, next(count), file_ext))
     return name
 
 def save_file(instance, field_name, file):
