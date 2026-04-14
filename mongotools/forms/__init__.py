@@ -80,10 +80,9 @@ class MongoFormMetaClass(type):
         return new_class
 
 
-class MongoForm(forms.BaseForm):
+class MongoForm(forms.BaseForm, metaclass=MongoFormMetaClass):
 
     """Base MongoForm class. Used to create new MongoForms"""
-    __metaclass__ = MongoFormMetaClass
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None,
                  error_class=forms.utils.ErrorList, label_suffix=':',
