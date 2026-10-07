@@ -19,14 +19,12 @@ class MongoFormMetaClass(type):
     def __new__(cls, name, bases, attrs):
         # get all valid existing Fields and sort them
         fields = [(field_name, attrs.pop(field_name)) for field_name, obj in
-                  attrs.items() if isinstance(obj, forms.Field)]
-        fields.sort(
-            lambda x, y: cmp(x[1].creation_counter, y[1].creation_counter))
+                  list(attrs.items()) if isinstance(obj, forms.Field)]
 
         # get all Fields from base classes
         for base in bases[::-1]:
             if hasattr(base, 'base_fields'):
-                fields = base.base_fields.items() + fields
+                fields = list(base.base_fields.items()) + fields
 
         # add the fields as "our" base fields
         attrs['base_fields'] = OrderedDict(fields)
@@ -80,10 +78,9 @@ class MongoFormMetaClass(type):
         return new_class
 
 
-class MongoForm(forms.BaseForm):
+class MongoForm(forms.BaseForm, metaclass=MongoFormMetaClass):
 
     """Base MongoForm class. Used to create new MongoForms"""
-    __metaclass__ = MongoFormMetaClass
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None,
                  error_class=forms.utils.ErrorList, label_suffix=':',
